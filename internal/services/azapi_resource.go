@@ -106,6 +106,12 @@ func ResourceAzApiResource() *schema.Resource {
 				Default:  false,
 			},
 
+			"do_not_delete_on_destroy": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+
 			"ignore_missing_property": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -413,6 +419,12 @@ func resourceAzApiResourceDelete(d *schema.ResourceData, meta interface{}) error
 	for _, id := range d.Get("locks").([]interface{}) {
 		locks.ByID(id.(string))
 		defer locks.UnlockByID(id.(string))
+	}
+
+	
+	if d.Get("do_not_delete_on_destroy").(bool) {
+		return fmt.Errorf("forgetting about %q", id)
+		return nil;
 	}
 
 	_, err = client.Delete(ctx, id.AzureResourceId, id.ApiVersion)
